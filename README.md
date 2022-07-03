@@ -1,0 +1,2 @@
+# launchpadding
+macOS Launchpad management
