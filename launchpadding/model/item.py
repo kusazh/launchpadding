@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String
 
-from model.base import Base, session
-from model.app import App
-from model.downloading_app import DownloadingApp
-from model.group import Group
+from launchpadding.model.base import Base, session
+from launchpadding.model.app import App
+from launchpadding.model.downloading_app import DownloadingApp
+from launchpadding.model.group import Group
 
 
 class Item(Base):
@@ -34,8 +34,8 @@ class Item(Base):
     ordering = Column(Integer)
 
     def __repr__(self):
-        return "<Item(rowid='%s', uuid='%s', flags='%s', type='%s', parent_id='%s', ordering='%s')>" % (
-            self.rowid, self.uuid, self.flags, self.type, self.parent_id, self.ordering
+        return "<Item(rowid='%s', type='%s', parent_id='%s', ordering='%s')>" % (
+            self.rowid, self.type, self.parent_id, self.ordering
         )
 
     @property

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from model.base import Base
+from launchpadding.model.base import Base
 
 
 class DownloadingApp(Base):
@@ -25,8 +25,6 @@ class DownloadingApp(Base):
     install_path = Column(String)
 
     def __repr__(self):
-        return (
-            "<DownloadingApp(item_id='%s', title='%s', bundleid='%s', storeid='%s', category_id='%s'>" % (
-                self.item_id, self.title, self.bundleid, self.storeid, self.category_id
-            )
+        return "<DownloadingApp(item_id='%s', title='%s'>" % (
+            self.item_id, self.title
         )

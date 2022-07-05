@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from model.base import Base, session
+from launchpadding.model.base import Base, session
 
 
 class Group(Base):
@@ -19,8 +19,8 @@ class Group(Base):
     title = Column(String)
 
     def __repr__(self):
-        return "<Group(item_id='%s', category_id='%s', title='%s')>" % (
-            self.item_id, self.category_id, self.title
+        return "<Group(item_id='%s', title='%s')>" % (
+            self.item_id, self.title
         )
 
     @property

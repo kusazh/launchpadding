@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, LargeBinary
 
-from model.base import Base
+from launchpadding.model.base import Base
 
 
 class App(Base):
@@ -27,8 +27,6 @@ class App(Base):
     bookmark = Column(LargeBinary)
 
     def __repr__(self):
-        return (
-            "<App(item_id='%s', title='%s', bundleid='%s', storeid='%s', category_id='%s', moddate='%s'>" % (
-                self.item_id, self.title, self.bundleid, self.storeid, self.category_id, self.moddate
-            )
+        return "<App(item_id='%s', title='%s'>" % (
+            self.item_id, self.title
         )
