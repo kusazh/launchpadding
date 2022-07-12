@@ -24,6 +24,11 @@ class Group(Base):
         )
 
     @property
+    def view_title(self):
+        _view_title = self.title if len(self.title) < 13 else self.title[:13] + '...'
+        return f'[{_view_title}]'
+
+    @property
     def targets(self):
         from model.item import Item
         parent = session.query(Item).where(Item.parent_id == self.item_id).first()
