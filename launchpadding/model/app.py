@@ -16,7 +16,7 @@ class App(Base):
     );
     """
 
-    __tablename__ = 'apps'
+    __tablename__ = "apps"
 
     item_id = Column(Integer, primary_key=True)
     title = Column(String)
@@ -27,10 +27,8 @@ class App(Base):
     bookmark = Column(LargeBinary)
 
     def __repr__(self):
-        return "<App(item_id='%s', title='%s'>" % (
-            self.item_id, self.title
-        )
+        return "<App(item_id='%s', title='%s'>" % (self.item_id, self.title)
 
     @property
     def view_title(self):
-        return self.title if len(self.title) < 13 else self.title[:13] + '...'
+        return self.title if len(self.title) < 13 else self.title[:13] + "..."
