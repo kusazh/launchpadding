@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from launchpadding.model.base import Base, session
+from launchpadding.model.base import Base
 
 
 class Group(Base):
@@ -18,18 +18,17 @@ class Group(Base):
     category_id = Column(Integer)
     title = Column(String)
 
-    def __repr__(self):
-        return "<Group(item_id='%s', title='%s')>" % (self.item_id, self.title)
+    def __repr__(self) -> str:
+        return f"<Group(item_id={self.item_id}, title={self.title})>"
 
     @property
-    def view_title(self):
-        _view_title = self.title if len(self.title) < 13 else self.title[:13] + "..."
-        return f"[{_view_title}]"
+    def view_title(self) -> str:
+        title = self.title if len(self.title) < 13 else self.title[:13] + "..."
+        return f"[{title}]"
 
-    # @property
-    # def targets(self):
-    #     from model.item import Item
+    @property
+    def targets(self) -> list:
+        from launchpadding.model.item import Item
 
-    #     parent = session.query(Item).where(Item.parent_id == self.item_id).first()
-    #     items = session.query(Item).where(Item.parent_id == parent.rowid).all()
-    #     return [item.target for item in items]
+        items = Item.get_multi_by_parent(self.item_id + 1)
+        return [item.target for item in items]

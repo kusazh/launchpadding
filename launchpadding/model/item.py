@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import subprocess
 
 from sqlalchemy import Column, Integer, String
@@ -6,6 +8,9 @@ from launchpadding.model.base import Base, session
 from launchpadding.model.app import App
 from launchpadding.model.downloading_app import DownloadingApp
 from launchpadding.model.group import Group
+
+
+TYPE_MAP = {2: Group, 4: App, 5: DownloadingApp}
 
 
 class Item(Base):
@@ -22,8 +27,6 @@ class Item(Base):
 
     __tablename__ = "items"
 
-    TYPE_MAP = {2: Group, 4: App, 5: DownloadingApp}
-
     rowid = Column(Integer, primary_key=True)
     uuid = Column(String)
     flags = Column(Integer)
@@ -31,57 +34,51 @@ class Item(Base):
     parent_id = Column(Integer)
     ordering = Column(Integer)
 
-    def __repr__(self):
-        return "<Item(rowid='%s', type='%s', parent_id='%s', ordering='%s')>" % (
-            self.rowid,
-            self.type,
-            self.parent_id,
-            self.ordering,
-        )
+    def __repr__(self) -> str:
+        return f"<Item(rowid={self.rowid}, type={self.type}, parent_id={self.parent_id}, ordering={self.ordering})>"
 
     @property
-    def target(self):
-        obj = self.TYPE_MAP.get(self.type, None)
-        return (
-            session.query(obj).where(obj.item_id == self.rowid).first() if obj else None
-        )
+    def target(self) -> Group | App | DownloadingApp | None:
+        clz = TYPE_MAP.get(self.type)
+        if clz:
+            return session.query(clz).where(clz.item_id == self.rowid).first()
+        return None
 
     @property
-    def parent(self):
+    def parent(self) -> Item | None:
         return self.__class__.get(self.parent_id)
 
     @classmethod
-    def get(cls, rowid):
+    def get(cls, rowid: int) -> Item | None:
         return session.query(cls).where(cls.rowid == rowid).first()
 
     @classmethod
-    def get_multi_by_parent(cls, parent_id):
+    def get_multi_by_parent(cls, parent_id: int) -> list[Item]:
         return session.query(cls).where(cls.parent_id == parent_id).all()
 
     @classmethod
-    def get_multi_by_page(cls, page):
+    def get_multi_by_page(cls, page: int) -> list[Item]:
         return cls.get_multi_by_parent(cls.get_page_dict()[page])
 
     @classmethod
-    def get_page_dict(cls):
+    def get_page_dict(cls) -> dict[int, int]:
         pages = session.query(cls).where(cls.parent_id == 1).all()
         return {item.ordering: item.rowid for item in pages if item.ordering}
 
-    def _update(self, **kwargs):
+    def _update(self, **kwargs: int | str) -> None:
         for k, v in kwargs.items():
             setattr(self, k, v)
         session.commit()
 
     @classmethod
-    def get_layout_dict(cls):
-        page_dict = cls.get_page_dict()
+    def get_layout_dict(cls) -> dict[int, list[Item]]:
         return {
             ordering: cls.get_multi_by_parent(rowid)
-            for ordering, rowid in page_dict.items()
+            for ordering, rowid in cls.get_page_dict().items()
         }
 
     @classmethod
-    def print_layout(cls, width=7):
+    def print_layout(cls, width: int = 7) -> None:
         d = cls.get_layout_dict()
         rs = []
         for page, items in d.items():
@@ -95,7 +92,7 @@ class Item(Base):
         print("\n".join(rs))
 
     @classmethod
-    def fill(cls, page_size=35):
+    def fill(cls, page_size: int = 35) -> None:
         page_dict = cls.get_page_dict()
         previous_slots = 0
         for i in range(1, max(page_dict) + 1):
@@ -107,7 +104,7 @@ class Item(Base):
         subprocess.run(["killall", "Dock"])
 
     @classmethod
-    def reset(cls):
+    def reset(cls) -> None:
         subprocess.run(
             ["defaults", "write", "com.apple.dock", "ResetLaunchPad", "-bool", "true"]
         )

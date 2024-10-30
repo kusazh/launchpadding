@@ -24,9 +24,9 @@ class DownloadingApp(Base):
     category_id = Column(Integer)
     install_path = Column(String)
 
-    def __repr__(self):
-        return "<DownloadingApp(item_id='%s', title='%s'>" % (self.item_id, self.title)
+    def __repr__(self) -> str:
+        return f"<DownloadingApp(item_id={self.item_id}, title={self.title}>"
 
     @property
-    def view_title(self):
-        return self.title if len(self.title) < 13 else self.title[:13] + "..."
+    def view_title(self) -> str:
+        return str(self.title if len(self.title) < 13 else self.title[:13] + "...")
