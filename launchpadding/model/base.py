@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 db_path = subprocess.getoutput(
     "echo /private$(getconf DARWIN_USER_DIR)com.apple.dock.launchpad/db/db"
 )
-engine = create_engine(f"sqlite:///{db_path}", echo=True)
+engine = create_engine(f"sqlite:///{db_path}", echo=False)  # echo=True when debugging
 
 Session = sessionmaker(bind=engine)
 Base = declarative_base()

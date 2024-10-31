@@ -78,18 +78,20 @@ class Item(Base):
         }
 
     @classmethod
-    def print_layout(cls, width: int = 7) -> None:
+    def print_layout(cls, column: int = 7) -> None:
         d = cls.get_layout_dict()
         rs = []
         for page, items in d.items():
-            rs.append(f"\033[1m==> Page {page}\033[0m")
-            for i in range(0, len(items), width):
+            _rs = []
+            _rs.append(f"\033[1m==> Page {page}\033[0m")
+            for i in range(0, len(items), column):
                 titles = [
-                    f"[{item.ordering + 1:>2}] {item.target.view_title}"
-                    for item in items[i : i + width]
+                    f"[{item.ordering + 1:>2}] {t.view_title if (t := item.target) else ''}"
+                    for item in items[i : i + column]
                 ]
-                rs.append(("{:16}\t" * len(titles)).format(*titles))
-        print("\n".join(rs))
+                _rs.append(("{:16}\t" * len(titles)).format(*titles))
+            rs.append("\n".join(_rs))
+        print("\n\n".join(rs))
 
     @classmethod
     def fill(cls, page_size: int = 35) -> None:
