@@ -7,8 +7,8 @@ class Formatter(argparse.ArgumentDefaultsHelpFormatter):
     def format_help(self) -> str:
         return super().format_help() + (
             "\nexample usage:\n"
-            "  launchpadding show --row 7 --column 5\n"
-            "  launchpadding fill --row 7 --column 5\n"
+            "  launchpadding show --column 7\n"
+            "  launchpadding fill\n"
             "  launchpadding reset\n"
         )
 
@@ -19,10 +19,7 @@ def main():
     )
     parser.add_argument("command", type=str, choices=["show", "fill", "reset", "help"])
     parser.add_argument(
-        "--row", "-r", type=int, default=7, help="rows of items per page"
-    )
-    parser.add_argument(
-        "--column", "-c", type=int, default=5, help="columns of items per page"
+        "--column", "-c", type=int, default=7, help="columns of items per page"
     )
 
     args = parser.parse_args()
@@ -31,7 +28,7 @@ def main():
         case "show":
             Item.print_layout(column=args.column)
         case "fill":
-            Item.fill(page_size=args.row * args.column)
+            Item.fill()
         case "reset":
             Item.reset()
         case "help":

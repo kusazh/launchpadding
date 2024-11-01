@@ -1,6 +1,7 @@
 import subprocess
+from contextlib import contextmanager
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -14,3 +15,22 @@ engine = create_engine(f"sqlite:///{db_path}", echo=False)  # echo=True when deb
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 session = Session()
+
+
+@contextmanager
+def ignore_tragger():
+    with engine.connect() as conn:
+        conn.execute(
+            text("UPDATE dbinfo SET value=1 WHERE key='ignore_items_update_triggers'")
+        )
+        conn.commit()
+
+        try:
+            yield
+        finally:
+            conn.execute(
+                text(
+                    "UPDATE dbinfo SET value=0 WHERE key='ignore_items_update_triggers'"
+                )
+            )
+            conn.commit()

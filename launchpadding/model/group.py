@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import mapped_column
 
 from launchpadding.model.base import Base
 
@@ -14,9 +15,9 @@ class Group(Base):
 
     __tablename__ = "groups"
 
-    item_id = Column(Integer, primary_key=True)
-    category_id = Column(Integer)
-    title = Column(String)
+    item_id = mapped_column(Integer, primary_key=True)
+    category_id = mapped_column(Integer)
+    title = mapped_column(String)
 
     def __repr__(self) -> str:
         return f"<Group(item_id={self.item_id}, title={self.title})>"
@@ -30,5 +31,5 @@ class Group(Base):
     def targets(self) -> list:
         from launchpadding.model.item import Item
 
-        items = Item.get_multi_by_parent(self.item_id + 1)
+        items = Item.get_multi_by_parent(int(self.item_id + 1))
         return [item.target for item in items]
