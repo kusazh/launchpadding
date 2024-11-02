@@ -52,11 +52,6 @@ class Item(Base):
         return session.query(cls).where(cls.parent_id == parent_id).all()
 
     @classmethod
-    def get_multi_by_page(cls, page: int) -> list[Item]:
-        page_dict = cls.get_page_dict()
-        return cls.get_multi_by_parent(page_dict[page])
-
-    @classmethod
     def get_page_dict(cls) -> dict[int, int]:
         pages = session.query(cls).where(cls.parent_id == 1).all()
         return {item.ordering: item.rowid for item in pages if item.ordering}
@@ -122,22 +117,20 @@ class Item(Base):
 
     @classmethod
     def sort_by_color(cls, reverse: bool = False) -> None:
-        def _filter(item: Item) -> tuple[float, float, float]:
+        def _key(item: Item) -> tuple[float, float]:
             target = item.target
             if not target or not (image := target.image):
-                return 1.0, 0.0, 0.0
-            image = image.resize((1, 1))
-            r, g, b, a = cast(tuple[int, int, int, int], image.getpixel((0, 0)))
-            r = int(r * (255 - a) / 255)
-            g = int(g * (255 - a) / 255)
-            b = int(b * (255 - a) / 255)
-            h, l, s = colorsys.rgb_to_hls(r, g, b)
+                return 2.0, 2.0
+            image = image.convert("RGB").resize((1, 1))
+            r, g, b = cast(tuple[int, int, int], image.getpixel((0, 0)))
+            h, l, _ = colorsys.rgb_to_hls(r, g, b)
 
-            # TODO: white at first, black at last, but should < 1
-            # if l < 64:
-            #     h = 0.999 + h / 1000
-            # if l > 192:
-            #     h = 0 + h / 1000
-            return h, -l, s
+            # consider as white or black icon
+            if max([r, g, b]) - min([r, g, b]) < 32:
+                if l < 128:
+                    h += 1
+                else:
+                    h -= 1
+            return round(h, 1), -l
 
-        return cls.sort(_filter, reverse=reverse)
+        return cls.sort(_key, reverse=reverse)

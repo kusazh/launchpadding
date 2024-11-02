@@ -6,10 +6,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # get Launchpad db path
-db_path = subprocess.getoutput(
-    "echo /private$(getconf DARWIN_USER_DIR)com.apple.dock.launchpad/db/db"
-)
-engine = create_engine(f"sqlite:///{db_path}", echo=False)  # echo=True when debugging
+user_dir = subprocess.run(
+    ["getconf", "DARWIN_USER_DIR"], capture_output=True, text=True
+).stdout.strip()
+
+engine = create_engine(
+    f"sqlite:////private{user_dir}com.apple.dock.launchpad/db/db", echo=False
+)  # echo=True when debugging
 
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
@@ -38,7 +41,11 @@ def ignore_tragger():
 def get_current_columns() -> int:
     try:
         return int(
-            subprocess.getoutput("defaults read com.apple.dock springboard-columns")
+            subprocess.run(
+                ["defaults", "read", "com.apple.dock", "springboard-columns"],
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
         )
     except ValueError:
         return 7

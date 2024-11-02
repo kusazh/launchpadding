@@ -9,7 +9,7 @@ class Formatter(argparse.ArgumentDefaultsHelpFormatter):
             "\nexample usage:\n"
             "  launchpadding show\n"
             "  launchpadding fill\n"
-            "  launchpadding sort --order title --reverse\n"
+            "  launchpadding sort --method [title|color] [--reverse]\n"
             "  launchpadding reset\n"
         )
 
@@ -27,18 +27,18 @@ def main():
     command_parser.add_parser("help")
 
     sort_parser.add_argument(
-        "--order",
-        "-o",
+        "--method",
+        "-m",
         type=str,
         default="title",
         choices=["title", "color"],
-        help="sorting order",
+        help="sorting method",
     )
     sort_parser.add_argument(
         "--reverse",
         "-r",
         action="store_true",
-        help="reverse sorting order",
+        help="sort in descending order",
     )
 
     args = parser.parse_args()
@@ -48,7 +48,7 @@ def main():
         case "fill":
             Item.fill()
         case "sort":
-            match args.order:
+            match args.method:
                 case "title":
                     Item.sort_by_title(reverse=args.reverse)
                 case "color":
