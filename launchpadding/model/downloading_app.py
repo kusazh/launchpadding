@@ -2,20 +2,10 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import mapped_column
 
 from launchpadding.model.base import Base
+from launchpadding.model.image_cache import ImageCacheMixin
 
 
-class DownloadingApp(Base):
-    """
-    CREATE TABLE downloading_apps (
-        item_id INTEGER PRIMARY KEY,
-        title VARCHAR,
-        bundleid VARCHAR,
-        storeid VARCHAR,
-        category_id INTEGER,
-        install_path VARCHAR
-    );
-    """
-
+class DownloadingApp(Base, ImageCacheMixin):
     __tablename__ = "downloading_apps"
 
     item_id = mapped_column(Integer, primary_key=True)

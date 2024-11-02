@@ -2,17 +2,10 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import mapped_column
 
 from launchpadding.model.base import Base
+from launchpadding.model.image_cache import ImageCacheMixin
 
 
-class Group(Base):
-    """
-    CREATE TABLE groups (
-        item_id INTEGER PRIMARY KEY,
-        category_id INTEGER,
-        title VARCHAR
-    );
-    """
-
+class Group(Base, ImageCacheMixin):
     __tablename__ = "groups"
 
     item_id = mapped_column(Integer, primary_key=True)

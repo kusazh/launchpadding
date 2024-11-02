@@ -2,16 +2,15 @@ from __future__ import annotations
 
 import colorsys
 import subprocess
-from typing import Callable
+from typing import Callable, cast
 
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import mapped_column
 
-from launchpadding.model.base import Base, session, get_current_columns, ignore_tragger
 from launchpadding.model.app import App
+from launchpadding.model.base import Base, get_current_columns, ignore_tragger, session
 from launchpadding.model.downloading_app import DownloadingApp
 from launchpadding.model.group import Group
-
 
 TYPE_MAP: dict[int, type[Group | App | DownloadingApp]] = {
     2: Group,
@@ -21,17 +20,6 @@ TYPE_MAP: dict[int, type[Group | App | DownloadingApp]] = {
 
 
 class Item(Base):
-    """
-    CREATE TABLE items (
-        rowid INTEGER PRIMARY KEY ASC,
-        uuid VARCHAR,
-        flags INTEGER,
-        type INTEGER,
-        parent_id INTEGER NOT NULL,
-        ordering INTEGER
-    );
-    """
-
     __tablename__ = "items"
 
     rowid = mapped_column(Integer, primary_key=True)
@@ -136,18 +124,20 @@ class Item(Base):
     def sort_by_color(cls, reverse: bool = False) -> None:
         def _filter(item: Item) -> tuple[float, float, float]:
             target = item.target
-            if (
-                not target
-                or not isinstance(target, App)
-                or not (color := target.icon_color)
-            ):
+            if not target or not (image := target.image):
                 return 1.0, 0.0, 0.0
-            h, l, s = colorsys.rgb_to_hls(*color)
-            l = 255 - l
-            if l < 64:
-                h = 0.0
-            elif l > 192:
-                h = 0.9
-            return h, l, s
+            image = image.resize((1, 1))
+            r, g, b, a = cast(tuple[int, int, int, int], image.getpixel((0, 0)))
+            r = int(r * (255 - a) / 255)
+            g = int(g * (255 - a) / 255)
+            b = int(b * (255 - a) / 255)
+            h, l, s = colorsys.rgb_to_hls(r, g, b)
+
+            # TODO: white at first, black at last, but should < 1
+            # if l < 64:
+            #     h = 0.999 + h / 1000
+            # if l > 192:
+            #     h = 0 + h / 1000
+            return h, -l, s
 
         return cls.sort(_filter, reverse=reverse)
