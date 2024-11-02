@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import colorsys
 import subprocess
 from typing import Callable
 
@@ -112,12 +113,12 @@ class Item(Base):
         subprocess.run(["killall", "Dock"])
 
     @classmethod
-    def sort_by_title(cls, reverse: bool = False) -> None:
+    def sort(cls, key: Callable, reverse: bool = False) -> None:
         page_dict = cls.get_page_dict()
         items = sum(
             (cls.get_multi_by_parent(rowid) for rowid in page_dict.values()), []
         )
-        items.sort(key=lambda i: t.title if (t := i.target) else "", reverse=reverse)
+        items.sort(key=key, reverse=reverse)
 
         with ignore_tragger():
             for i, item in enumerate(items):
@@ -125,3 +126,27 @@ class Item(Base):
                 item.ordering = i
             session.commit()
         subprocess.run(["killall", "Dock"])
+
+    @classmethod
+    def sort_by_title(cls, reverse: bool = False) -> None:
+        return cls.sort(lambda i: t.title if (t := i.target) else "", reverse=reverse)
+
+    @classmethod
+    def sort_by_color(cls, reverse: bool = False) -> None:
+        def _filter(item: Item) -> tuple[float, float, float]:
+            target = item.target
+            if (
+                not target
+                or not isinstance(target, App)
+                or not (color := target.icon_color)
+            ):
+                return 1.0, 0.0, 0.0
+            h, l, s = colorsys.rgb_to_hls(*color)
+            l = 255 - l
+            if l < 64:
+                h = 0.0
+            elif l > 192:
+                h = 0.9
+            return h, l, s
+
+        return cls.sort(_filter, reverse=reverse)
