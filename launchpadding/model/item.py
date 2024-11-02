@@ -7,7 +7,7 @@ from typing import Callable
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import mapped_column
 
-from launchpadding.model.base import Base, session, ignore_tragger
+from launchpadding.model.base import Base, session, get_current_columns, ignore_tragger
 from launchpadding.model.app import App
 from launchpadding.model.downloading_app import DownloadingApp
 from launchpadding.model.group import Group
@@ -81,8 +81,9 @@ class Item(Base):
         }
 
     @classmethod
-    def print_layout(cls, column: int = 7) -> None:
+    def print_layout(cls) -> None:
         d = cls.get_layout_dict()
+        column = get_current_columns()
         rs = []
         for page, items in d.items():
             _rs = []

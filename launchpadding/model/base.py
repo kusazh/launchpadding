@@ -34,3 +34,12 @@ def ignore_tragger():
                 )
             )
             conn.commit()
+
+
+def get_current_columns() -> int:
+    try:
+        return int(
+            subprocess.getoutput("defaults read com.apple.dock springboard-columns")
+        )
+    except ValueError:
+        return 7
